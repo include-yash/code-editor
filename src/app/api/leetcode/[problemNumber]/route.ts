@@ -45,7 +45,7 @@ export async function GET(request: Request) {
     const problemSlug = problem.stat.question__title_slug;
     const problemUrl = `https://leetcode.com/problems/${problemSlug}/`;
 
-    // ✅ Fetch full problem details
+    // ✅ Fetch full problem details and code snippets
     const problemResponse = await fetch(`https://leetcode.com/graphql`, {
       method: "POST",
       headers: {
@@ -57,6 +57,11 @@ export async function GET(request: Request) {
           query getQuestionDetail($titleSlug: String!) {
             question(titleSlug: $titleSlug) {
               content
+              codeSnippets {
+                lang
+                langSlug
+                code
+              }
             }
           }
         `,
@@ -71,12 +76,51 @@ export async function GET(request: Request) {
     const problemData = await problemResponse.json();
     const problemStatement = problemData.data.question.content || "Problem description not available.";
 
+    // ✅ Extract code snippets
+    const codeSnippets = problemData.data.question.codeSnippets || [];
+    const starterCode: { [key: string]: string } = {};
+
+    // Map code snippets to supported languages
+    codeSnippets.forEach((snippet: { langSlug: string; code: string }) => {
+      switch (snippet.langSlug) {
+        case "javascript":
+          starterCode.javascript = snippet.code;
+          break;
+        case "python":
+          starterCode.python = snippet.code;
+          break;
+        case "java":
+          starterCode.java = snippet.code;
+          break;
+        case "cpp":
+          starterCode.cpp = snippet.code;
+          break;
+        case "csharp":
+          starterCode.csharp = snippet.code;
+          break;
+        case "ruby":
+          starterCode.ruby = snippet.code;
+          break;
+        case "swift":
+          starterCode.swift = snippet.code;
+          break;
+        case "go":
+          starterCode.go = snippet.code;
+          break;
+        case "rust":
+          starterCode.rust = snippet.code;
+          break;
+        // Add more languages as needed
+      }
+    });
+
     return NextResponse.json({
       title: problem.stat.question__title,
       difficulty:
         problem.difficulty.level === 1 ? "Easy" : problem.difficulty.level === 2 ? "Medium" : "Hard",
       url: problemUrl,
       problemStatement, // ✅ Full problem description in HTML format
+      starterCode, // ✅ Starter code for supported languages
     });
   } catch (error) {
     console.error("Error fetching problem:", error);

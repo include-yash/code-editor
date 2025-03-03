@@ -1,42 +1,57 @@
 "use client";
 import { useCodeEditorStore } from "@/store/useCodeEditorStore";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { defineMonacoThemes, LANGUAGE_CONFIG } from "../_constants";
 import { Editor } from "@monaco-editor/react";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import { RotateCcwIcon, TypeIcon } from "lucide-react";
 import { useClerk } from "@clerk/nextjs";
-
 import useMounted from "@/hooks/useMounted";
 
 function EditorPanel() {
   const clerk = useClerk();
-  const { language, theme, fontSize, editor, setFontSize, setEditor } = useCodeEditorStore();
-
+  const { language, theme, fontSize, editor, setFontSize, setEditor, problem } = useCodeEditorStore();
+  const editorRef = useRef<any>(null); // Ref to store the editor instance
   const mounted = useMounted();
 
-  useEffect(() => {
-    const savedCode = localStorage.getItem(`editor-code-${language}`);
-    const newCode = savedCode || LANGUAGE_CONFIG[language].defaultCode;
-    if (editor) editor.setValue(newCode);
-  }, [language, editor]);
+  // Handle editor mount
+  const handleEditorMount = (editorInstance: any) => {
+    editorRef.current = editorInstance;
+    setEditor(editorInstance);
+  };
 
+  // Watch for language changes and update the editor
+  useEffect(() => {
+    if (editorRef.current && problem?.starterCode?.[language]) {
+      // Update the editor with the correct starter code
+      editorRef.current.setValue(problem.starterCode[language]);
+    } else if (editorRef.current) {
+      // Fallback to default code if starter code is not available
+      const defaultCode = LANGUAGE_CONFIG[language].defaultCode || "";
+      editorRef.current.setValue(defaultCode);
+    }
+  }, [language, problem]);
+
+  // Handle font size changes
   useEffect(() => {
     const savedFontSize = localStorage.getItem("editor-font-size");
     if (savedFontSize) setFontSize(parseInt(savedFontSize));
   }, [setFontSize]);
 
+  // Handle refresh button click
   const handleRefresh = () => {
     const defaultCode = LANGUAGE_CONFIG[language].defaultCode;
-    if (editor) editor.setValue(defaultCode);
+    if (editorRef.current) editorRef.current.setValue(defaultCode);
     localStorage.removeItem(`editor-code-${language}`);
   };
 
+  // Handle editor content changes
   const handleEditorChange = (value: string | undefined) => {
     if (value) localStorage.setItem(`editor-code-${language}`, value);
   };
 
+  // Handle font size slider changes
   const handleFontSizeChange = (newSize: number) => {
     const size = Math.min(Math.max(newSize, 12), 24);
     setFontSize(size);
@@ -90,7 +105,7 @@ function EditorPanel() {
           </div>
         </div>
 
-        {/* Editor  */}
+        {/* Editor */}
         <div className="relative group rounded-xl overflow-hidden ring-1 ring-white/[0.05]">
           {clerk.loaded && (
             <Editor
@@ -99,7 +114,7 @@ function EditorPanel() {
               onChange={handleEditorChange}
               theme={theme}
               beforeMount={defineMonacoThemes}
-              onMount={(editor) => setEditor(editor)}
+              onMount={handleEditorMount} // Use the handleEditorMount function
               options={{
                 minimap: { enabled: false },
                 fontSize,
@@ -128,4 +143,5 @@ function EditorPanel() {
     </div>
   );
 }
+
 export default EditorPanel;
