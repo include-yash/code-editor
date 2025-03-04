@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { useCodeEditorStore } from "@/store/useCodeEditorStore";
 import { motion } from "framer-motion";
-import { AlertCircle, ExternalLink } from "lucide-react";
+import { ExternalLink } from "lucide-react";
 import SimpleBar from "simplebar-react";
 import "simplebar-react/dist/simplebar.min.css";
 

@@ -3,13 +3,15 @@
 import { useCodeEditorStore } from "@/store/useCodeEditorStore";
 import { useEffect, useRef, useState } from "react";
 import { defineMonacoThemes, LANGUAGE_CONFIG } from "../_constants";
-import { Editor } from "@monaco-editor/react";
+import { Editor, Monaco } from "@monaco-editor/react";
 import { AnimatePresence, motion } from "framer-motion";
 import Image from "next/image";
-import { RotateCcwIcon, TypeIcon, LightbulbIcon, X, Lightbulb, CopyIcon, ExternalLinkIcon } from "lucide-react";
+import { RotateCcwIcon, TypeIcon, LightbulbIcon, Lightbulb, CopyIcon, ExternalLinkIcon } from "lucide-react";
 import { useClerk } from "@clerk/nextjs";
 import useMounted from "@/hooks/useMounted";
 import toast from "react-hot-toast";
+
+
 
 // HintModal Component
 function HintModal({ hints, onClose }: { hints: string[]; onClose: () => void }) {
@@ -88,9 +90,11 @@ function EditorPanel() {
     analyzeCode,
     hints,
   } = useCodeEditorStore();
-  const editorRef = useRef<any>(null);
+  const editorRef = useRef<Monaco | null >(null);
   const mounted = useMounted();
   const [showHintsModal, setShowHintsModal] = useState(false);
+
+  console.log(editor); 
 
   const handleEditorMount = (editorInstance: any) => {
     editorRef.current = editorInstance;

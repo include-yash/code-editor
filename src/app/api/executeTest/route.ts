@@ -100,6 +100,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: true, hints });
   } catch (error) {
     console.error("Error analyzing code:", error);
+    console.log(error);
     return NextResponse.json(
       {
         error: "Error analyzing code",
