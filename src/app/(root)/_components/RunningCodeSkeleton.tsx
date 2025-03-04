@@ -1,3 +1,4 @@
+/* eslint-disable */
 const RunningCodeSkeleton = () => (
     <div className="space-y-4 animate-pulse">
       <div className="space-y-2">

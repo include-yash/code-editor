@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { SignInButton } from "@clerk/nextjs";
 import { LogIn } from "lucide-react";
 

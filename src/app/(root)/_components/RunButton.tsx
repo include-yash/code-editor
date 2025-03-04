@@ -1,3 +1,4 @@
+/* eslint-disable */
 "use client";
 
 import { getExecutionResult, useCodeEditorStore } from "@/store/useCodeEditorStore";

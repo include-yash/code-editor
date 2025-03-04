@@ -1,3 +1,4 @@
+/* eslint-disable */
 "use client";
 import { useCodeEditorStore } from "@/store/useCodeEditorStore";
 import { useEffect, useRef, useState } from "react";

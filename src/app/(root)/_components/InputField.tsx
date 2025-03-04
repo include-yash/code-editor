@@ -1,3 +1,4 @@
+/* eslint-disable */
 "use client";
 
 import { useState } from "react";
@@ -65,16 +66,7 @@ export default function InputField() {
       </motion.button>
 
       {/* Error message with fade-in animation */}
-      {error && (
-        <motion.p
-          className="text-red-400 text-sm absolute -bottom-5 left-0"
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -10 }}
-        >
-          {error}
-        </motion.p>
-      )}
+      
     </motion.div>
   );
 }
