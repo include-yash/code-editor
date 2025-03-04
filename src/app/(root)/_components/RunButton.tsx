@@ -39,7 +39,7 @@ function RunButton() {
       `}
     >
       {/* bg wit gradient */}
-      <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-blue-500 rounded-xl opacity-100 transition-opacity group-hover:opacity-90" />
+      <div className="absolute inset-0 bg-gradient-to-r from-green-600 to-green-500 rounded-xl opacity-100 transition-opacity group-hover:opacity-90" />
 
       <div className="relative flex items-center gap-2.5">
         {isRunning ? (
@@ -48,16 +48,14 @@ function RunButton() {
               <Loader2 className="w-4 h-4 animate-spin text-white/70" />
               <div className="absolute inset-0 blur animate-pulse" />
             </div>
-            <span className="text-sm font-medium text-white/90">Executing...</span>
+            
           </>
         ) : (
           <>
             <div className="relative flex items-center justify-center w-4 h-4">
               <Play className="w-4 h-4 text-white/90 transition-transform group-hover:scale-110 group-hover:text-white" />
             </div>
-            <span className="text-sm font-medium text-white/90 group-hover:text-white">
-              Run Code
-            </span>
+            
           </>
         )}
       </div>

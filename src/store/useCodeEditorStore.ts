@@ -20,6 +20,7 @@ const getInitialState = () => {
       language: "javascript",
       fontSize: 16,
       theme: "vs-dark",
+      hints: [],
     };
   }
 
@@ -27,6 +28,7 @@ const getInitialState = () => {
     language: localStorage.getItem("editor-language") || "javascript",
     theme: localStorage.getItem("editor-theme") || "vs-dark",
     fontSize: Number(localStorage.getItem("editor-font-size") || 16),
+    hints: [],
   };
 };
 
@@ -42,6 +44,7 @@ export const useCodeEditorStore = create<CodeEditorState & {
   incrementHintUnlock: () => void;
   updateHintProgress: () => void;
   runCode: () => Promise<void>;
+  analyzeCode: () => Promise<void>;
 }>((set, get) => ({
   ...getInitialState(),
   output: "",
@@ -55,6 +58,7 @@ export const useCodeEditorStore = create<CodeEditorState & {
   lastUnlockTime: null,
   isHintButtonActive: false,
   hintUnlockProgress: 0,
+  hints: [],
 
   getCode: () => get().editor?.getValue() || "",
 
@@ -245,6 +249,53 @@ export const useCodeEditorStore = create<CodeEditorState & {
       set({ isRunning: false });
     }
   },
+
+  analyzeCode: async () => {
+  const { language, getCode, problem } = get();
+  const code = getCode();
+
+  if (!code.trim()) {
+    set({ error: "Please enter some code before analyzing" });
+    return;
+  }
+
+  set({ isRunning: true, error: null, output: "" });
+
+  try {
+    const response = await fetch("/api/executeTest", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        language,
+        code,
+        problemStatement: problem?.problemStatement,
+      }),
+    });
+
+    const data = await response.json();
+    console.log("Response from /api/executeTest:", data); // Debugging
+
+    if (!response.ok || !data.success) {
+      throw new Error(data.error || "Failed to analyze code");
+    }
+
+    // Ensure hints is always an array
+    const hints = Array.isArray(data.hints) ? data.hints : [];
+    set({
+      hints,
+      isRunning: false,
+    });
+  } catch (error) {
+    console.error("Error in analyzeCode:", error); // Debugging
+    set({
+      error: error instanceof Error ? error.message : "Unknown analysis error",
+      output: "",
+      hints: [], // Reset hints to an empty array on error
+    });
+  } finally {
+    set({ isRunning: false });
+  }
+},
 }));
 
 export const getExecutionResult = () => useCodeEditorStore.getState().executionResult;

@@ -18,39 +18,63 @@ export default function InputField() {
     fetchProblem(problemNumber);
   };
 
+  // Handle Enter key press
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === "Enter") {
+      handleGoClick();
+    }
+  };
+
   return (
     <motion.div
-      className="flex w-full max-w-md items-center gap-3 bg-neutral-900 p-2 px-4 rounded-xl shadow-md border border-neutral-800"
+      className="flex w-full max-w-xs items-center gap-2 bg-neutral-900 p-2 rounded-xl shadow-lg border border-neutral-800"
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, ease: "easeOut" }}
     >
+      {/* Input field with focus animation */}
       <motion.input
         type="text"
-        placeholder="Enter problem number..."
+        placeholder="Problem #"
         value={inputValue}
         onChange={(e) => setInputValue(e.target.value)}
-        className="flex-1 px-2 py-2 text-sm md:text-base rounded-lg bg-neutral-800 text-white outline-none placeholder-gray-400 transition-all focus:ring-2 focus:ring-blue-500"
+        onKeyDown={handleKeyDown} // Add keydown event listener
+        className="flex-1 px-3 py-1.5 text-sm rounded-lg bg-neutral-800 text-white outline-none placeholder-gray-400 transition-all focus:ring-2 focus:ring-blue-500 focus:bg-neutral-750"
         whileFocus={{ scale: 1.02 }}
+        maxLength={4} // Limit input to 4 digits
       />
+
+      {/* Go button with loading animation */}
       <motion.button
         onClick={handleGoClick}
-        className="p-2 md:p-3 text-white bg-blue-600 rounded-lg transition-all shadow-sm hover:bg-blue-500 active:scale-95 disabled:opacity-50"
+        className="p-2 text-white bg-blue-600 rounded-lg transition-all shadow-md hover:bg-blue-500 active:scale-95 disabled:opacity-50"
         disabled={isFetchingProblem} // Disable while fetching
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
       >
         {isFetchingProblem ? (
           <motion.div
             animate={{ rotate: 360 }}
             transition={{ repeat: Infinity, duration: 0.6, ease: "linear" }}
           >
-            <Loader2 size={18} className="animate-spin" />
+            <Loader2 size={16} className="animate-spin" />
           </motion.div>
         ) : (
-          <ArrowUp size={18} />
+          <ArrowUp size={16} />
         )}
       </motion.button>
 
-      {error && <p className="text-red-400">{error}</p>}
+      {/* Error message with fade-in animation */}
+      {error && (
+        <motion.p
+          className="text-red-400 text-sm absolute -bottom-5 left-0"
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -10 }}
+        >
+          {error}
+        </motion.p>
+      )}
     </motion.div>
   );
 }

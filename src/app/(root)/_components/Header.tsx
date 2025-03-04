@@ -1,6 +1,5 @@
-
 import Link from "next/link";
-import { Blocks, Code2 } from "lucide-react"; // ✅ Removed Sparkles
+import { Blocks, Code2 } from "lucide-react";
 import { SignedIn } from "@clerk/nextjs";
 import ThemeSelector from "./ThemeSelector";
 import LanguageSelector from "./LanguageSelector";
@@ -10,8 +9,6 @@ import InputField from "./InputField";
 import HintViewer from "./HintViewer";
 
 async function Header() {
-  // ✅ Removed unused `convex` and `user`
-
   return (
     <div className="relative z-10">
       <div
@@ -33,7 +30,7 @@ async function Header() {
 
             <div className="flex flex-col">
               <span className="block text-lg font-semibold bg-gradient-to-r from-blue-400 via-blue-300 to-purple-400 text-transparent bg-clip-text">
-                CodeCraft
+                CodED
               </span>
               <span className="block text-xs text-blue-400/60 font-medium">
                 Interactive Code Editor
@@ -42,7 +39,7 @@ async function Header() {
           </Link>
 
           <nav className="flex items-center space-x-1">
-            <Link
+            {/* <Link
               href="/snippets"
               className="relative group flex items-center gap-2 px-4 py-1.5 rounded-lg text-gray-300 bg-gray-800/50 
                 hover:bg-blue-500/10 border border-gray-800 hover:border-blue-500/50 transition-all duration-300 shadow-lg overflow-hidden"
@@ -58,7 +55,7 @@ async function Header() {
               >
                 Snippets
               </span>
-            </Link>
+            </Link> */}
           </nav>
         </div>
 
@@ -70,7 +67,7 @@ async function Header() {
 
           {/* <Hint Button was here but is commented out */} 
 
-          <HintViewer />
+          {/* <HintViewer /> */}
           <InputField />
 
           <SignedIn>

@@ -4,6 +4,7 @@ import "./globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
 import ConvexClientProvider from "@/components/providers/ConvexClientProvider";
 import Footer from "@/components/Footer";
+import { Toaster } from "react-hot-toast"; // Import Toaster
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -33,7 +34,22 @@ export default function RootLayout({
           className={`${geistSans.variable} ${geistMono.variable} antialiased 
           min-h-screen bg-gradient-to-b from-gray-900 to-gray-950 text-gray-100 flex flex-col`}
         >
-          <ConvexClientProvider>{children}</ConvexClientProvider>
+          <ConvexClientProvider>
+            {children}
+            {/* Add Toaster for toast notifications */}
+            <Toaster
+              position="bottom-right" // Position of the toasts
+              toastOptions={{
+                style: {
+                  background: "#1e1e2e", // Dark background to match your theme
+                  color: "#fff", // White text
+                  border: "1px solid #ffffff10", // Subtle border
+                  borderRadius: "12px", // Rounded corners
+                  boxShadow: "0 4px 12px rgba(0, 0, 0, 0.2)", // Soft shadow
+                },
+              }}
+            />
+          </ConvexClientProvider>
           <Footer />
         </body>
       </html>

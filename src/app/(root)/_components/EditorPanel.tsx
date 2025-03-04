@@ -1,61 +1,175 @@
 "use client";
+
 import { useCodeEditorStore } from "@/store/useCodeEditorStore";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { defineMonacoThemes, LANGUAGE_CONFIG } from "../_constants";
 import { Editor } from "@monaco-editor/react";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import Image from "next/image";
-import { RotateCcwIcon, TypeIcon } from "lucide-react";
+import { RotateCcwIcon, TypeIcon, LightbulbIcon, X, Lightbulb, CopyIcon, ExternalLinkIcon } from "lucide-react";
 import { useClerk } from "@clerk/nextjs";
 import useMounted from "@/hooks/useMounted";
+import toast from "react-hot-toast";
+
+// HintModal Component
+function HintModal({ hints, onClose }: { hints: string[]; onClose: () => void }) {
+  const safeHints = Array.isArray(hints) ? hints : [];
+  const modalRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
+        onClose();
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [onClose]);
+
+  return (
+    <AnimatePresence>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="fixed inset-0 flex items-center justify-center bg-black/50 z-50 backdrop-blur-sm"
+      >
+        <motion.div
+          ref={modalRef}
+          initial={{ opacity: 0, y: -20, scale: 0.95 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          exit={{ opacity: 0, y: -20, scale: 0.95 }}
+          transition={{ type: "spring", damping: 20, stiffness: 300 }}
+          className="bg-[#1e1e2e] p-6 rounded-xl w-full max-w-md relative border border-white/10 shadow-lg"
+        >
+          <div className="flex items-center gap-3 mb-6">
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ delay: 0.2, type: "spring" }}
+              className="p-2 rounded-lg bg-[#2a2a3a]"
+            >
+              <Lightbulb className="w-6 h-6 text-yellow-400" />
+            </motion.div>
+            <h2 className="text-xl font-semibold text-white">Hints</h2>
+          </div>
+          <ul className="space-y-3">
+            {safeHints.map((hint, index) => (
+              <motion.li
+                key={index}
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: index * 0.1 + 0.3 }}
+                className="flex items-start gap-3 p-3 bg-[#2a2a3a] rounded-lg border border-white/10"
+              >
+                <span className="text-lg text-gray-200">{hint}</span>
+              </motion.li>
+            ))}
+          </ul>
+        </motion.div>
+      </motion.div>
+    </AnimatePresence>
+  );
+}
 
 function EditorPanel() {
   const clerk = useClerk();
-  const { language, theme, fontSize, editor, setFontSize, setEditor, problem } = useCodeEditorStore();
-  const editorRef = useRef<any>(null); // Ref to store the editor instance
+  const {
+    language,
+    theme,
+    fontSize,
+    editor,
+    setFontSize,
+    setEditor,
+    problem,
+    analyzeCode,
+    hints,
+  } = useCodeEditorStore();
+  const editorRef = useRef<any>(null);
   const mounted = useMounted();
+  const [showHintsModal, setShowHintsModal] = useState(false);
 
-  // Handle editor mount
   const handleEditorMount = (editorInstance: any) => {
     editorRef.current = editorInstance;
     setEditor(editorInstance);
   };
 
-  // Watch for language changes and update the editor
   useEffect(() => {
     if (editorRef.current && problem?.starterCode?.[language]) {
-      // Update the editor with the correct starter code
       editorRef.current.setValue(problem.starterCode[language]);
     } else if (editorRef.current) {
-      // Fallback to default code if starter code is not available
       const defaultCode = LANGUAGE_CONFIG[language].defaultCode || "";
       editorRef.current.setValue(defaultCode);
     }
   }, [language, problem]);
 
-  // Handle font size changes
   useEffect(() => {
     const savedFontSize = localStorage.getItem("editor-font-size");
     if (savedFontSize) setFontSize(parseInt(savedFontSize));
   }, [setFontSize]);
 
-  // Handle refresh button click
   const handleRefresh = () => {
     const defaultCode = LANGUAGE_CONFIG[language].defaultCode;
     if (editorRef.current) editorRef.current.setValue(defaultCode);
     localStorage.removeItem(`editor-code-${language}`);
   };
 
-  // Handle editor content changes
   const handleEditorChange = (value: string | undefined) => {
     if (value) localStorage.setItem(`editor-code-${language}`, value);
   };
 
-  // Handle font size slider changes
   const handleFontSizeChange = (newSize: number) => {
     const size = Math.min(Math.max(newSize, 12), 24);
     setFontSize(size);
     localStorage.setItem("editor-font-size", size.toString());
+  };
+
+  const handleAnalyzeCode = async () => {
+    await analyzeCode();
+    setShowHintsModal(true);
+  };
+
+  // Copy Code to Clipboard
+  const handleCopyCode = () => {
+    if (editorRef.current) {
+      const code = editorRef.current.getValue();
+      navigator.clipboard
+        .writeText(code)
+        .then(() => {
+          toast.success("Code copied to clipboard!", {
+            icon: "📋", // Custom icon
+            style: {
+              background: "#2a2a3a", // Slightly lighter background for the toast
+              color: "#fff",
+              border: "1px solid #ffffff10",
+              borderRadius: "12px",
+              boxShadow: "0 4px 12px rgba(0, 0, 0, 0.2)",
+            },
+          });
+        })
+        .catch(() => {
+          toast.error("Failed to copy code.", {
+            icon: "❌", // Custom icon for errors
+            style: {
+              background: "#ff4444", // Red background for errors
+              color: "#fff",
+              border: "1px solid #ffffff10",
+              borderRadius: "12px",
+              boxShadow: "0 4px 12px rgba(0, 0, 0, 0.2)",
+            },
+          });
+        });
+    }
+  }
+
+  // Open LeetCode Problem
+  const handleOpenLeetCode = () => {
+    if (problem?.url) {
+      window.open(problem.url, "_blank");
+    }
   };
 
   if (!mounted) return null;
@@ -93,6 +207,28 @@ function EditorPanel() {
               </div>
             </div>
 
+            {/* Copy Code Button */}
+            <motion.button
+  whileHover={{ scale: 1.1 }}
+  whileTap={{ scale: 0.95 }}
+  onClick={handleCopyCode}
+  className="p-2 bg-[#1e1e2e] hover:bg-[#2a2a3a] rounded-lg ring-1 ring-white/5 transition-colors"
+  aria-label="Copy code"
+>
+  <CopyIcon className="size-5 text-gray-400" />
+</motion.button>
+
+            {/* LeetCode Button */}
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={handleOpenLeetCode}
+              className="p-2 bg-[#1e1e2e] hover:bg-[#2a2a3a] rounded-lg ring-1 ring-white/5 transition-colors"
+              aria-label="Open in LeetCode"
+            >
+              <ExternalLinkIcon className="size-5 text-gray-400" />
+            </motion.button>
+
             <motion.button
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.95 }}
@@ -100,7 +236,17 @@ function EditorPanel() {
               className="p-2 bg-[#1e1e2e] hover:bg-[#2a2a3a] rounded-lg ring-1 ring-white/5 transition-colors"
               aria-label="Reset to default code"
             >
-              <RotateCcwIcon className="size-4 text-gray-400" />
+              <RotateCcwIcon className="size-5 text-gray-400" />
+            </motion.button>
+
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={handleAnalyzeCode}
+              className="p-2 bg-[#1e1e2e] hover:bg-[#2a2a3a] rounded-lg ring-1 ring-white/5 transition-colors"
+              aria-label="Analyze code"
+            >
+              <LightbulbIcon className="size-5 text-yellow-400" />
             </motion.button>
           </div>
         </div>
@@ -114,7 +260,7 @@ function EditorPanel() {
               onChange={handleEditorChange}
               theme={theme}
               beforeMount={defineMonacoThemes}
-              onMount={handleEditorMount} // Use the handleEditorMount function
+              onMount={handleEditorMount}
               options={{
                 minimap: { enabled: false },
                 fontSize,
@@ -140,6 +286,14 @@ function EditorPanel() {
           )}
         </div>
       </div>
+
+      {/* Hints Modal */}
+      {showHintsModal && (
+        <HintModal
+          hints={hints}
+          onClose={() => setShowHintsModal(false)}
+        />
+      )}
     </div>
   );
 }
