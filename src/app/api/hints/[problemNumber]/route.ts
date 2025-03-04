@@ -6,9 +6,11 @@ interface Prompt {
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { problemNumber: string } }
+  { params }: { params: { [key: string]: string | string[] } } // Correct type
 ) {
-  const problemNumber = params.problemNumber;
+  const problemNumber = Array.isArray(params.problemNumber)
+    ? params.problemNumber[0] // Use the first element if it's an array
+    : params.problemNumber; // Otherwise, use it as is
 
   // Validate problemNumber
   if (!problemNumber || isNaN(Number(problemNumber))) {
