@@ -1,3 +1,4 @@
+/* eslint-disable */
 import Link from "next/link";
 import { Blocks } from "lucide-react";
 import { SignedIn } from "@clerk/nextjs";

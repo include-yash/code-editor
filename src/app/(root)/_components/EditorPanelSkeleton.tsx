@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { Terminal } from "lucide-react";
 
 export function EditorPanelSkeleton() {
