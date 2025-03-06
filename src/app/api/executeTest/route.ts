@@ -25,19 +25,26 @@ export async function POST(request: NextRequest) {
 
     // Prepare the prompt for Gemini
     const prompt = `
-      You are a code analysis engine. Analyze the following ${language} code and provide only one hint statement to proceed further on how to solve the problem statement from this point.
-      The problem statement is:
-      ${problemStatement}
+      You are a code analysis engine. Analyze the following ${language} code and provide a single, subtle hint to help the user proceed further in solving the problem. The hint should be based on the current state of the code and should encourage the user to think critically about the next logical step.
 
-      Code:
-      ${code}
+The problem statement is:
+${problemStatement}
 
-      Provide hints in JSON format with the following structure:
-      {
-        "hints": [
-          "hint"
-        ]
-      }
+Code:
+${code}
+
+Provide the hint in JSON format with the following structure:
+{
+  "hints": [
+    "hint"
+  ]
+}
+
+Guidelines for the hint:
+1. The hint should be concise and relevant to the current state of the code.
+2. It should not directly solve the problem but instead guide the user toward the next step.
+3. Consider the amount of code written and the problem statement to provide a meaningful hint.
+4. The hint should encourage the user to think about potential improvements, missing logic, or alternative approaches.
     `;
     console.log("Prompt sent to Gemini:", prompt);
 

@@ -12,8 +12,6 @@ import { useClerk } from "@clerk/nextjs";
 import useMounted from "@/hooks/useMounted";
 import toast from "react-hot-toast";
 
-
-
 // HintModal Component
 function HintModal({ hints, onClose }: { hints: string[]; onClose: () => void }) {
   const safeHints = Array.isArray(hints) ? hints : [];
@@ -91,11 +89,9 @@ function EditorPanel() {
     analyzeCode,
     hints,
   } = useCodeEditorStore();
-  const editorRef = useRef<Monaco | null >(null);
+  const editorRef = useRef<Monaco | null>(null);
   const mounted = useMounted();
   const [showHintsModal, setShowHintsModal] = useState(false);
-
-  console.log(editor); 
 
   const handleEditorMount = (editorInstance: any) => {
     editorRef.current = editorInstance;
@@ -145,9 +141,9 @@ function EditorPanel() {
         .writeText(code)
         .then(() => {
           toast.success("Code copied to clipboard!", {
-            icon: "📋", // Custom icon
+            icon: "📋",
             style: {
-              background: "#2a2a3a", // Slightly lighter background for the toast
+              background: "#2a2a3a",
               color: "#fff",
               border: "1px solid #ffffff10",
               borderRadius: "12px",
@@ -157,9 +153,9 @@ function EditorPanel() {
         })
         .catch(() => {
           toast.error("Failed to copy code.", {
-            icon: "❌", // Custom icon for errors
+            icon: "❌",
             style: {
-              background: "#ff4444", // Red background for errors
+              background: "#ff4444",
               color: "#fff",
               border: "1px solid #ffffff10",
               borderRadius: "12px",
@@ -168,7 +164,7 @@ function EditorPanel() {
           });
         });
     }
-  }
+  };
 
   // Open LeetCode Problem
   const handleOpenLeetCode = () => {
@@ -183,7 +179,7 @@ function EditorPanel() {
     <div className="relative">
       <div className="relative bg-[#12121a]/90 backdrop-blur rounded-xl border border-white/[0.05] p-6">
         {/* Header */}
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex flex-col lg:flex-row items-center justify-between mb-4 gap-4">
           <div className="flex items-center gap-3">
             <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-[#1e1e2e] ring-1 ring-white/5">
               <Image src={"/" + language + ".png"} alt="Logo" width={24} height={24} />
@@ -214,14 +210,14 @@ function EditorPanel() {
 
             {/* Copy Code Button */}
             <motion.button
-  whileHover={{ scale: 1.1 }}
-  whileTap={{ scale: 0.95 }}
-  onClick={handleCopyCode}
-  className="p-2 bg-[#1e1e2e] hover:bg-[#2a2a3a] rounded-lg ring-1 ring-white/5 transition-colors"
-  aria-label="Copy code"
->
-  <CopyIcon className="size-5 text-gray-400" />
-</motion.button>
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={handleCopyCode}
+              className="p-2 bg-[#1e1e2e] hover:bg-[#2a2a3a] rounded-lg ring-1 ring-white/5 transition-colors"
+              aria-label="Copy code"
+            >
+              <CopyIcon className="size-5 text-gray-400" />
+            </motion.button>
 
             {/* LeetCode Button */}
             <motion.button
@@ -234,6 +230,7 @@ function EditorPanel() {
               <ExternalLinkIcon className="size-5 text-gray-400" />
             </motion.button>
 
+            {/* Refresh Button */}
             <motion.button
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.95 }}
@@ -244,6 +241,7 @@ function EditorPanel() {
               <RotateCcwIcon className="size-5 text-gray-400" />
             </motion.button>
 
+            {/* Analyze Code Button */}
             <motion.button
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.95 }}
